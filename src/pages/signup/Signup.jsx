@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Signup.css";
 import NavBar from "../../compnents/organisms/navBar/NavBar";
+import { GoogleLogin, googleLogout, useGoogleLogin } from "@react-oauth/google";
+import { FcGoogle } from "react-icons/fc";
+
+import axios from "axios";
 
 function Signup() {
   const [fullName, setFullName] = useState("");
@@ -8,6 +12,36 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState("");
+  const [profile, setProfile] = useState("");
+
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => {
+      console.log("login goood");
+      setUser(codeResponse);
+    },
+    onError: (error) => {
+      console.log("failed");
+      console.log("Login Failed:", error);
+    },
+  });
+
+  useEffect(() => {
+    if (user) {
+      axios
+        .get(
+          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.access_token}`,
+              Accept: "application/json",
+            },
+          }
+        )
+        .then((res) => setProfile(res.data))
+        .catch((err) => console.log("error", err));
+    }
+  }, [user]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,13 +62,14 @@ function Signup() {
       setMessage("Please fill in all required fields.");
     }
   };
-
+  console.log("user: ", user);
+  console.log("profile: ", profile);
   return (
     <div>
       <NavBar />
       <div className="formBody">
         <div className="signupImg">
-          <text>Already have an Account...!</text>
+          <p>Already have an Account...!</p>
           <br />
           <button type="submit" className="logbtn">
             Login
@@ -111,7 +146,16 @@ function Signup() {
           <button type="submit" className="signupbtn cred">
             Sign Up
           </button>
+          <div className="cred" id="signInDiv">
+           
+          </div>
         </form>
+        <div className="cred" id="signInDiv">
+        
+          <button onClick={login} className = "signupButton">
+            <FcGoogle className="mr-4" /> Sign in with your Google Account
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import LandingPage from "./pages/landing/LandingPage";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Signup from "./pages/signup/Signup"
 import Login from "./pages/login/Login"
+import ErrorPage from "./pages/errorPage/errorPage";
 
 function App() {
   const router = createBrowserRouter([
@@ -22,6 +23,10 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
+    },
+    {
+      path: "/errorPage",
+      element: <ErrorPage />,
     },
   ]);
 
