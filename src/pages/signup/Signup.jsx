@@ -7,19 +7,19 @@ import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
 
 function Signup() {
-  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState("");
-  const [profile, setProfile] = useState("");
+  // const [user, setUser] = useState("");
+  // const [profile, setProfile] = useState("");
 
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => {
       console.log("login goood");
       // setUser(codeResponse);
-      if(codeResponse) {
+      if (codeResponse) {
         axios
           .get(
             `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`,
@@ -59,11 +59,23 @@ function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (fullName && email && password && confirmPassword) {
+    if (username && email && password && confirmPassword) {
       if (password.length >= 6 && /\d/.test(password)) {
         if (password === confirmPassword) {
           // add authentication and backend connection here
-          console.log("Form submitted successfully!");
+          let data = {
+            username,
+            email,
+            password,
+          };
+          axios({
+            url: "http://localhost:4000/auth/register",
+            method: "POST",
+            data: data,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }).catch((err) => console.log("error", err));
         } else {
           setMessage("Passwords do not match");
         }
@@ -76,13 +88,13 @@ function Signup() {
       setMessage("Please fill in all required fields.");
     }
   };
-  console.log("user: ", user);
-  console.log("profile: ", {
-    username: profile.name,
-    email: profile.email,
-    picture: profile.picture,
-    id: profile.id,
-  });
+  // console.log("user: ", user);
+  // console.log("profile: ", {
+  //   username: profile.name,
+  //   email: profile.email,
+  //   picture: profile.picture,
+  //   id: profile.id,
+  // });
   return (
     <div>
       <NavBar />
@@ -105,16 +117,16 @@ function Signup() {
           </div>
 
           <div className="fullname cred">
-            <label className="formlabel" htmlFor="fullName">
+            <label className="formlabel" htmlFor="username">
               Full Name{" "}
             </label>
             <input
               type="text"
-              name="fullName"
-              id="fullName"
+              name="username"
+              id="username"
               className="forminput"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
