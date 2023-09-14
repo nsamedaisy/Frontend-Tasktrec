@@ -18,30 +18,44 @@ function Signup() {
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => {
       console.log("login goood");
-      setUser(codeResponse);
+      // setUser(codeResponse);
+      if(codeResponse) {
+        axios
+          .get(
+            `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`,
+            {
+              headers: {
+                Authorization: `Bearer ${codeResponse.access_token}`,
+                Accept: "application/json",
+              },
+            }
+          )
+          .then((res) => {
+            console.log("connect to the backend");
+            // setProfile(res.data);
+            let data = {
+              username: res.data.name,
+              email: res.data.email,
+              picture: res.data.picture,
+              id: res.data.id,
+            };
+            axios({
+              url: "http://localhost:4000/auth/register",
+              method: "POST",
+              data: data,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          })
+          .catch((err) => console.log("error", err));
+      }
     },
     onError: (error) => {
       console.log("failed");
       console.log("Login Failed:", error);
     },
   });
-
-  useEffect(() => {
-    if (user) {
-      axios
-        .get(
-          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.access_token}`,
-              Accept: "application/json",
-            },
-          }
-        )
-        .then((res) => setProfile(res.data))
-        .catch((err) => console.log("error", err));
-    }
-  }, [user]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,7 +77,12 @@ function Signup() {
     }
   };
   console.log("user: ", user);
-  console.log("profile: ", profile);
+  console.log("profile: ", {
+    username: profile.name,
+    email: profile.email,
+    picture: profile.picture,
+    id: profile.id,
+  });
   return (
     <div>
       <NavBar />
@@ -146,13 +165,10 @@ function Signup() {
           <button type="submit" className="signupbtn cred">
             Sign Up
           </button>
-          <div className="cred" id="signInDiv">
-           
-          </div>
+          <div className="cred" id="signInDiv"></div>
         </form>
         <div className="cred" id="signInDiv">
-        
-          <button onClick={login} className = "signupButton">
+          <button onClick={login} className="signupButton">
             <FcGoogle className="mr-4" /> Sign in with your Google Account
           </button>
         </div>

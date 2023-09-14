@@ -11,22 +11,22 @@ function App() {
     {
       path: "/",
       element: <LandingPage />,
+      errorElement: <ErrorPage />,
     },
     {
       path: "/signup",
       element: <Signup />,
+      errorElement: <ErrorPage />,
     },
     {
       path: "/login",
       element: <Login />,
+      errorElement: <ErrorPage />,
     },
     {
       path: "/dashboard",
       element: <Dashboard />,
-    },
-    {
-      path: "/errorPage",
-      element: <ErrorPage />,
+      errorElement: <ErrorPage />,
     },
   ]);
 
