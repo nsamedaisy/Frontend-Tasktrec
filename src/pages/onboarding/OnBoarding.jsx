@@ -11,47 +11,38 @@ function OnBoarding() {
   const [projectdescription, setProjectDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [tasks, setTasks] = useState([])
-  const [error, setError] = useState()
+  const [tasks, setTasks] = useState([]);
+  const [error, setError] = useState();
 
   const navigate = useNavigate();
-  const { token, setProjectname, userData } = useContext(TmsContext);
-
-  console.log(token)
+  const { token, setProjectname, userData, setTaskData } =
+    useContext(TmsContext);
 
   console.log(token);
 
-
-
-  const addTask = async (taskData) => {
-    const response = await axios.post("https://fontend-tasktrec.vercel.app/tasks", taskData, {
+  const addTask = async () => {
+    let data = {
+      name: tasks,
+    };
+    if (token) {
+    }
+    const response = await axios({
+      url: "http://localhost:3000/tasks",
+      method: "POST",
+      data: data,
       headers: {
-        Authorization: "Bearer a29.a0AfB_byDG8fkUbi3Sqzk3iKUBodPprRpBBlT2WQsT8rI…IgaCgYKASUSARASFQGOcNnCMXQ50PSWwYnoK_UaWUZ2DQ0169",
-        // token: localStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.accessToken}`,
+        Accept: "application/json",
       },
     });
-  
-    if (!response.ok) {
-      throw new Error("Failed to create task: " + response.statusText);
-    }
-  
-    const data = await response.json();
-    return data;
-  };
-  
-  
-  const handleAddTask = async () => {
-    const taskName = document.getElementById('taskinput').value;
-    const taskData = { name: taskName };
-    try {
-      const createdTask = await addTask(taskData);
-      // Update state
-      setTasks([...tasks, createdTask]);
-      // Clear the input field
-      document.getElementById('taskinput').value = '';
-    } catch (error) {
-      setError("Failed to create task");
+
+    if (response && response.data) {
+      toast.success("Task successfully created");
+      setTaskData(response.data.name);
+      console.log(response.data);
+    } else {
+      toast.error("Failed to create Task.");
+      console.log(error?.data?.message);
     }
   };
 
@@ -70,8 +61,8 @@ function OnBoarding() {
       startDate,
       estimateEndDate: endDate,
     };
- if (token) {
- }
+    if (token) {
+    }
     const response = await axios({
       url: "http://localhost:5000/projects",
       method: "POST",
@@ -85,10 +76,10 @@ function OnBoarding() {
     if (response && response.data) {
       toast.success("project successfully created");
       setProjectname(response.data.name);
-      console.log(response.data)
+      console.log(response.data);
     } else {
       toast.error("Failed to create project.");
-      console.log(error?.data?.message)
+      console.log(error?.data?.message);
     }
   };
 
@@ -187,8 +178,14 @@ function OnBoarding() {
             it can be handled by just one person
           </p>
           <h4>Backlogs</h4>
-          <input type="text" id="taskinput" className="forminput" />
-          <button className="addtaskBtn" onClick={handleAddTask}>
+          <input
+            type="text"
+            id="taskinput"
+            className="forminput"
+            value={tasks}
+            onChange={(e) => setTasks(e.target.value)}
+          />
+          <button className="addtaskBtn" onClick={addTask}>
             Add Task
           </button>
           {error && <p className="createtaskErr">{error}</p>}
