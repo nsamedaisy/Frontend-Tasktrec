@@ -131,7 +131,7 @@ function Login() {
           .then((res) => {
             if (res && res.data.status === 200) {
               console.log("Login successful!");
-              navigate("/dashboard"); // navigate to onboarding page
+              navigate("/dashboard");
             }
           })
           .catch((err) => {

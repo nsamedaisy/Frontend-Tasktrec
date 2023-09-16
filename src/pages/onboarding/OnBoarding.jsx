@@ -17,18 +17,19 @@ function OnBoarding() {
   const navigate = useNavigate();
   const { token, setProjectname, userData } = useContext(TmsContext);
 
+  console.log(token)
 
   console.log(token);
 
 
 
   const addTask = async (taskData) => {
-    const response = await axios("https://tms-gdb08-0923.onrender.com/tasks", {
-      method: "POST",
+    const response = await axios.post("https://fontend-tasktrec.vercel.app/tasks", taskData, {
       headers: {
+        Authorization: "Bearer a29.a0AfB_byDG8fkUbi3Sqzk3iKUBodPprRpBBlT2WQsT8rI…IgaCgYKASUSARASFQGOcNnCMXQ50PSWwYnoK_UaWUZ2DQ0169",
+        // token: localStorage.getItem("token"),
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(taskData),
     });
   
     if (!response.ok) {
@@ -39,17 +40,17 @@ function OnBoarding() {
     return data;
   };
   
+  
   const handleAddTask = async () => {
     const taskName = document.getElementById('taskinput').value;
     const taskData = { name: taskName };
     try {
       const createdTask = await addTask(taskData);
-      // Update state with the created task data
+      // Update state
       setTasks([...tasks, createdTask]);
       // Clear the input field
       document.getElementById('taskinput').value = '';
     } catch (error) {
-      // Handle error, e.g. display error message to user
       setError("Failed to create task");
     }
   };
