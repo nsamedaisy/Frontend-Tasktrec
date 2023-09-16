@@ -13,49 +13,37 @@ function OnBoarding() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [tasks, setTasks] = useState([]);
-  const [error, setError] = useState("");
-  const [projectToken, setProjectToken] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [move, setMove] = useState(true);
+  const [error, setError] = useState();
 
   const navigate = useNavigate();
-  const { token, setProjectname, userData } = useContext(TmsContext);
-
-  console.log(token)
+  const { token, setProjectname, userData, setTaskData } =
+    useContext(TmsContext);
 
   console.log(token);
 
-
-
-  const addTask = async (taskData) => {
-    const response = await axios.post("https://fontend-tasktrec.vercel.app/tasks", taskData, {
+  const addTask = async () => {
+    let data = {
+      name: tasks,
+    };
+    if (token) {
+    }
+    const response = await axios({
+      url: "http://localhost:3000/tasks",
+      method: "POST",
+      data: data,
       headers: {
-        Authorization: "Bearer a29.a0AfB_byDG8fkUbi3Sqzk3iKUBodPprRpBBlT2WQsT8rI…IgaCgYKASUSARASFQGOcNnCMXQ50PSWwYnoK_UaWUZ2DQ0169",
-        // token: localStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.accessToken}`,
+        Accept: "application/json",
       },
     });
-  
-    if (!response.ok) {
-      throw new Error("Failed to create task: " + response.statusText);
-    }
-  
-    const data = await response.json();
-    return data;
-  };
-  
-  
-  const handleAddTask = async () => {
-    const taskName = document.getElementById("taskinput").value;
-    const taskData = { name: taskName };
-    try {
-      const createdTask = await addTask(taskData);
-      // Update state
-      setTasks([...tasks, createdTask]);
-      // Clear the input field
-      document.getElementById("taskinput").value = "";
-    } catch (error) {
-      setError("Failed to create task");
+
+    if (response && response.data) {
+      toast.success("Task successfully created");
+      setTaskData(response.data.name);
+      console.log(response.data);
+    } else {
+      toast.error("Failed to create Task.");
+      console.log(error?.data?.message);
     }
   };
 
@@ -76,40 +64,12 @@ function OnBoarding() {
       startDate,
       estimateEndDate: endDate,
     };
-
     if (token) {
-      const response = await server.post("/projects", data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      });
-console.log(response);
-      if (response && response.data) {
-        toast.success("project successfully created", response.data.data);
-        setProjectData(response.data.data);
-        setProjectToken(response.data.data.id);
-      } else {
-        toast.error("Failed to create project.");
-        console.log(error?.data?.message);
-        
-      }
-    } else {
-      console.log("no token, cannot proceed");
-      setMove(false);
     }
-  };
-
-  const handleInvite = async () => {
-    const emailContent = `${conf.clientbaseURL}/${projectToken}`;
-
-    let data = {
-      token: projectToken,
-      emails: `${inviteEmail}`, //need to create a list of invitees email
-      emailContent,
-    };
-
-    const response = await server.post("/invitation", data, {
+    const response = await axios({
+      url: "http://localhost:5000/projects",
+      method: "POST",
+      data: data,
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
@@ -117,11 +77,12 @@ console.log(response);
     });
 
     if (response && response.data) {
-      toast.success("invitation successfully sent", response.data);
+      toast.success("project successfully created");
+      setProjectname(response.data.name);
+      console.log(response.data);
     } else {
-      toast.error("Failed to send an invite.");
+      toast.error("Failed to create project.");
       console.log(error?.data?.message);
-      setMove(false);
     }
   };
 
@@ -220,8 +181,14 @@ console.log(response);
             it can be handled by just one person
           </p>
           <h4>Backlogs</h4>
-          <input type="text" id="taskinput" className="forminput" />
-          <button className="addtaskBtn" onClick={handleAddTask}>
+          <input
+            type="text"
+            id="taskinput"
+            className="forminput"
+            value={tasks}
+            onChange={(e) => setTasks(e.target.value)}
+          />
+          <button className="addtaskBtn" onClick={addTask}>
             Add Task
           </button>
           {error && <p className="createtaskErr">{error}</p>}
